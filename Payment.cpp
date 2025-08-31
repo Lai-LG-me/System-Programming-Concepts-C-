@@ -46,7 +46,7 @@ void paymentMethod(double totalPrice, Booking custBook, int daySelected) {
 // Cash payment
 void cashPayment(double totalPrice, Booking custBook, int daySelected) {
     double userPaid;
-    double change; 
+    double change;
 
     cout << string(30, '-') << endl;
     cout << "Cash Payment" << endl;
@@ -63,11 +63,11 @@ void cashPayment(double totalPrice, Booking custBook, int daySelected) {
             change = userPaid - totalPrice;
             cout << "Change: RM " << fixed << setprecision(2) << change << endl;
 
-            cout << "Payment successful!" << endl;      
+            cout << "Payment successful!" << endl;
             break;
         }
     }
-    printReceipt(custBook, totalPrice, daySelected, 1,userPaid, change);         // means that the payment choice = 1 (cash)
+    printReceipt(custBook, totalPrice, daySelected, 1, userPaid, change);         // means that the payment choice = 1 (cash)
 }
 
 // Bank-in payment
@@ -75,7 +75,7 @@ void bankInPayment(double totalPrice, Booking custBook, int daySelected) {
     int bankChoice;
 
     while (true) {
-        cout << "Choose your bank (1 = Affin, 2 = MayBank, 3 = Public Bank): ";
+        cout << "Choose your bank (1 = Affin Bank, 2 = MayBank, 3 = Public Bank): ";
         cin >> bankChoice;
 
         if (cin.fail() || (bankChoice != 1 && bankChoice != 2 && bankChoice != 3)) {
@@ -103,7 +103,7 @@ void bankInPayment(double totalPrice, Booking custBook, int daySelected) {
 
     if (confirmation == "yes" || confirmation == "Yes") {
         cout << "Payment successfully made via bank.\n";
-        printReceipt(custBook, totalPrice, daySelected,2, totalPrice,0);      // means that 2 = bank in
+        printReceipt(custBook, totalPrice, daySelected, 2, totalPrice, 0);      // means that 2 = bank in
     }
     else {
         cout << "Bank-in payment cancelled.\n";
@@ -157,9 +157,9 @@ void Payment(Booking custBook) {
 // Print receipt
 void printReceipt(const Booking& custBook, double totalPrice, int daySelected, int paymentChoice, double userPaid, double change) {
     system("cls");
-    cout << string(100, '=') << endl;
+    cout << string(100, '+') << endl;
     cout << setw(46) << " " << "RECEIPT" << endl;
-    cout << string(100, '=') << endl;
+    cout << string(100, '+') << endl;
 
     cout << left << setw(15) << "Venue ID"
         << setw(30) << "Venue Name"
@@ -192,7 +192,7 @@ void printReceipt(const Booking& custBook, double totalPrice, int daySelected, i
     else {
         cout << "Invalid Input! Please re-enter..." << endl;
     }
-  
+
 
     cout << "Thank you for your support!" << endl;
 }

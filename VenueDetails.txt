@@ -1,0 +1,4 @@
+Hall_1,Multifunction Hall,300,13000.00,16000.00
+Hall_2,Banquet Hall,400,14000.00,17000.00
+Hall_3,Premium Hall,500,15000.00,18000.00
+Hall_4,Platinum Hall,600,16000.00,19000.00

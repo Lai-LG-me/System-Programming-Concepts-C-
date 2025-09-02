@@ -24,12 +24,21 @@ int daySelection() {
     return daySelect;
 }
 
-// Payment method selector
+// Select payment method (cash/bank in)
 void paymentMethod(double totalPrice, Booking custBook, int daySelected) {
     int paymentChoice;
-    cout << "Choose your payment method (1 = Cash, 2 = Bank-in): ";
-    cin >> paymentChoice;
-
+    while (true) {
+        cout << "Choose your payment method (1 = Cash, 2 = Bank-in): ";
+        cin >> paymentChoice;
+        if (cin.fail() || (paymentChoice != 1 && paymentChoice != 2)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Invalid input! Please enter 1 or 2 only.\n";
+        }
+        else {
+            break;
+		}
+    }
     switch (paymentChoice) {
     case 1:
         cashPayment(totalPrice, custBook, daySelected);
@@ -96,87 +105,126 @@ void bankInPayment(double totalPrice, Booking custBook, int daySelected) {
     }
     cout << string(30, '-') << endl;
 
-    string confirmation;
-    cout << "Total Price: RM " << fixed << setprecision(2) << totalPrice << endl;
-    cout << "Confirm transfer? Enter 'yes' to confirm: ";
-    cin >> confirmation;
+    while (true) {
+        int confirmation;
+        cout << "Total Price: RM " << fixed << setprecision(2) << totalPrice << endl;
+		cout << "1 = Confirm Payment, 2 = Cancel Payment: ";
+        cin >> confirmation;
 
-    if (confirmation == "yes" || confirmation == "Yes") {
-        cout << "Payment successfully made via bank.\n";
-        printReceipt(custBook, totalPrice, daySelected, 2, totalPrice, 0);      // means that 2 = bank in
+        if (cin.fail() || confirmation >2 || confirmation <1) {
+            cin.clear();                  // clear error state
+            cin.ignore(10000, '\n');      // discard invalid input
+            cout << "Invalid input! Please enter a number.\n\n";
+            continue;                     // restart loop
+        }
+
+        else if (confirmation == 1) {
+            cout << "Payment successfully made via bank.\n";
+            printReceipt(custBook, totalPrice, daySelected, 2, totalPrice, 0);
+            break; 
+        }
+        else if(confirmation == 2) {
+            while (true) {
+                cout << "Are you sure you want to cancel the payment? (1 = Yes, 2 = No): ";
+                int cancelChoice;
+                cin >> cancelChoice;
+                if (cin.fail()|| cancelChoice>2 || cancelChoice <1) {
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                    cout << "Invalid input! Please enter again.\n\n";
+                    continue; // ask again
+                }
+                else if (cancelChoice == 1) {
+                    cout << "Payment cancelled. Returning to payment method selection.\n";
+                    paymentMethod(totalPrice, custBook, daySelected);   // Return to payment method selection
+                    return;                                             // Exit the current function to avoid further execution
+                }
+                else if (cancelChoice == 2) {
+                    // return to confirmation prompt
+					break; // Exit the inner loop to return to the confirmation prompt
+                }
+                
+            }
+
+		}
     }
-    else {
-        cout << "Bank-in payment cancelled.\n";
-    }
+    
 }
 
-// Display booking/payment details
-void Payment_BookingDetailPage(Booking custBook, double totalPrice, int daySelected) {
-    cout << string(100, '+') << endl;
-    cout << setw(46) << " " << "Payment" << endl;
-    cout << string(100, '+') << endl;
+// calculate deposit function
+int deposit(double hallPrice) {
+    const double DEPOSIT_PERCENTAGE = 0.3;
+    return static_cast<double>(DEPOSIT_PERCENTAGE) * hallPrice;
+}
 
+// Display booking/payment details only, won't display user details
+// to make it reusable (can be use at print receipt)
+void Payment_BookingDetailPage(Booking custBook, double hallPrice, int daySelected, double totalPrice) {
+    totalPrice = hallPrice + deposit(hallPrice);
+    
     cout << left << setw(15) << "Venue ID"
         << setw(30) << "Venue Name"
         << setw(10) << "Pax"
         << setw(15) << "Day Type"
         << setw(15) << "Price (RM)" << endl;
-
+  
     cout << string(100, '=') << endl;
 
     cout << left << setw(15) << custBook.venue.venueId
         << setw(30) << custBook.venue.venueName
         << setw(10) << custBook.venue.holdableAmount
         << setw(15) << (daySelected == 1 ? "Half Day" : "Full Day")
-        << setw(15) << fixed << setprecision(2) << totalPrice << endl;
+        << setw(15) << fixed << setprecision(2) << hallPrice << endl;
+
+    cout << string(100, '-') << endl;
+    // print deposit
+    cout << "Deposit: RM " << deposit(hallPrice) << endl;
+    // print total price
+    cout << "Total Price: RM " << totalPrice << endl;
 
     cout << string(100, '=') << endl;
 
+}
+
+// Payment page
+void PaymentPage(Booking custBook, double hallPrice, int daySelected) {
+    system("cls");
+
+    cout << string(100, '+') << endl;
+    cout << setw(46) << " " << "Payment" << endl;
+    cout << string(100, '+') << endl;
+
+    // print booking details
+    Payment_BookingDetailPage(custBook, hallPrice, daySelected);
+
+    // print customer details
     cout << left << setw(20) << "Customer Name:" << custBook.customerName << endl;
     cout << left << setw(20) << "Phone Number:" << custBook.phoneNo << endl;
     cout << left << setw(20) << "Event Date:" << custBook.date << endl;
     cout << left << setw(20) << "Event Time:" << custBook.time << endl;
 
     cout << string(100, '=') << endl;
-}
 
-// Payment page
-void PaymentPage(Booking custBook, double totalPrice, int daySelected) {
-    system("cls");
-    Payment_BookingDetailPage(custBook, totalPrice, daySelected);
-    paymentMethod(totalPrice, custBook, daySelected);
+    paymentMethod(hallPrice, custBook, daySelected);
 }
 
 // Main payment flow
 void Payment(Booking custBook) {
     int daySelected = daySelection();
-    double totalPrice = (daySelected == 1) ? custBook.venue.halfDayPrice : custBook.venue.fullDayPrice;
-    PaymentPage(custBook, totalPrice, daySelected);
+    double hallPrice = (daySelected == 1) ? custBook.venue.halfDayPrice : custBook.venue.fullDayPrice;
+    PaymentPage(custBook, hallPrice, daySelected);
 }
 
 // Print receipt
-void printReceipt(const Booking& custBook, double totalPrice, int daySelected, int paymentChoice, double userPaid, double change) {
+void printReceipt(const Booking& custBook, double hallPrice, int daySelected, int paymentChoice, double userPaid, double change) {
     system("cls");
     cout << string(100, '+') << endl;
     cout << setw(46) << " " << "RECEIPT" << endl;
     cout << string(100, '+') << endl;
 
-    cout << left << setw(15) << "Venue ID"
-        << setw(30) << "Venue Name"
-        << setw(10) << "Pax"
-        << setw(15) << "Day Type"
-        << setw(15) << "Price (RM)" << endl;
+    Payment_BookingDetailPage(custBook, hallPrice, daySelected);
 
-    cout << string(100, '-') << endl;
-
-    cout << left << setw(15) << custBook.venue.venueId
-        << setw(30) << custBook.venue.venueName
-        << setw(10) << custBook.venue.holdableAmount
-        << setw(15) << (daySelected == 1 ? "Half Day" : "Full Day")
-        << setw(15) << fixed << setprecision(2) << totalPrice << endl;
-    cout << string(100, '=') << endl;
-
-    cout << "Total Price: RM " << totalPrice << endl;
+   
     cout << "Payment Method: ";
     if (paymentChoice == 1) {
         cout << "Cash\n";
@@ -186,7 +234,7 @@ void printReceipt(const Booking& custBook, double totalPrice, int daySelected, i
     }
     else if (paymentChoice == 2) {
         cout << "Bank In\n";
-        cout << "Paid: RM " << totalPrice << endl;
+        cout << "Paid: RM " << hallPrice << endl;
         cout << "Changes: RM 0.00" << endl;
     }
     else {

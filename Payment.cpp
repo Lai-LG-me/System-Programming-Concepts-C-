@@ -76,7 +76,7 @@ void cashPayment(double totalPrice, Booking custBook, int daySelected) {
             break;
         }
     }
-    printReceipt(custBook, totalPrice, daySelected, 1, userPaid, change);         // means that the payment choice = 1 (cash)
+    printReceipt(custBook, hallPrice, daySelected, 1, userPaid, change);         // means that the payment choice = 1 (cash)
 }
 
 // Bank-in payment
@@ -120,7 +120,7 @@ void bankInPayment(double totalPrice, Booking custBook, int daySelected) {
 
         else if (confirmation == 1) {
             cout << "Payment successfully made via bank.\n";
-            printReceipt(custBook, totalPrice, daySelected, 2, totalPrice, 0);
+            printReceipt(custBook, hallPrice, daySelected, 2, totalPrice, 0);
             break; 
         }
         else if(confirmation == 2) {
@@ -152,10 +152,11 @@ void bankInPayment(double totalPrice, Booking custBook, int daySelected) {
 }
 
 // calculate deposit function
-int deposit(double hallPrice) {
+double deposit(double hallPrice) {
     const double DEPOSIT_PERCENTAGE = 0.3;
-    return static_cast<double>(DEPOSIT_PERCENTAGE) * hallPrice;
+    return hallPrice * DEPOSIT_PERCENTAGE;
 }
+
 
 // Display booking/payment details only, won't display user details
 // to make it reusable (can be use at print receipt)
@@ -244,3 +245,4 @@ void printReceipt(const Booking& custBook, double hallPrice, int daySelected, in
 
     cout << "Thank you for your support!" << endl;
 }
+
